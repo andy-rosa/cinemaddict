@@ -16,38 +16,27 @@ function camelToSnake(str) {
   return str.replace(regexp, transformSnake);
 }
 
-function adaptiveToServer(transformObject) {
-  const snakeObject = {};
-  Object.entries(transformObject).forEach(([key, values]) => {
-    const adaptiveKey = camelToSnake(key);
-    let adaptiveValue = values;
-    let screenValue = null;
-    if (isObject(adaptiveValue)) {
-      adaptiveValue = adaptiveToServer(values);
-    }
-    if (typeof adaptiveValue === 'string') {
-      screenValue = he.encode(adaptiveValue);
-    }
-    snakeObject[adaptiveKey] = screenValue || adaptiveValue;
-  });
-  return snakeObject;
+function setTransformation(transFunc) {
+  return function adaptive(transformObject) {
+    const resultObject = {};
+    Object.entries(transformObject).forEach(([key, values]) => {
+      const adaptiveKey = transFunc(key);
+      let adaptiveValue = values;
+      let screenValue = null;
+      if (isObject(adaptiveValue)) {
+        adaptiveValue = adaptive(values);
+      }
+      if (typeof adaptiveValue === 'string') {
+        screenValue = he.encode(adaptiveValue);
+      }
+      resultObject[adaptiveKey] = screenValue || adaptiveValue;
+    });
+    return resultObject;
+  };
 }
 
-function adaptiveToApp(transformObject) {
-  const camelObject = {};
-  Object.entries(transformObject).forEach(([key, values]) => {
-    const adaptiveKey = snakeToCamel(key);
-    let adaptiveValue = values;
-    let screenValue = null;
-    if (isObject(adaptiveValue)) {
-      adaptiveValue = adaptiveToApp(values);
-    }
-    if (typeof adaptiveValue === 'string') {
-      screenValue = he.encode(adaptiveValue);
-    }
-    camelObject[adaptiveKey] = screenValue || adaptiveValue;
-  });
-  return camelObject;
-}
+const adaptiveToApp = setTransformation(snakeToCamel);
+const adaptiveToServer = setTransformation(camelToSnake);
+
 
 export { adaptiveToServer, adaptiveToApp };
