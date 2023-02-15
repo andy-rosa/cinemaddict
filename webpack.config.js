@@ -2,9 +2,9 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-  entry: './src/main.js',
+  entry: './src/main.ts',
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(__dirname, 'docs'),
     filename: 'bundle.js',
     clean: true,
   },
@@ -17,9 +17,9 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/i,
-        exclude: /(node_modules)/,
-        use: ['babel-loader']
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
       },
       {
           test: /\.css$/i,
